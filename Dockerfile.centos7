@@ -1,0 +1,83 @@
+FROM centos:centos7 as build
+
+RUN yum repolist && yum update -y \
+    && \
+    yum install -y \
+        git \
+        krb5-devel \
+        libcurl-devel \
+        libgdiplus \
+        libicu-devel \
+        lttng-ust-devel \
+        openssl-devel \
+        sudo \
+        wget \
+        which \
+        zlib-devel \
+        gcc-multilib \
+        ninja-build \
+        python3 \
+        centos-release-scl \
+        scl-utils \
+    && \
+    yum clean all
+
+RUN yum update -y \
+    && \
+    yum install -y \
+        devtoolset-11 \
+    && \
+    yum clean all
+
+
+RUN wget -O v1.11.1.tar.gz https://github.com/ninja-build/ninja/archive/refs/tags/v1.11.1.tar.gz && \
+    mkdir ninja && \
+    tar -xvf v1.11.1.tar.gz -C ninja
+
+RUN cd ninja/ninja-1.11.1 && \
+    source scl_source enable devtoolset-11 && \
+    ls -l && \
+    ./configure.py --bootstrap && \
+    ./ninja -v && \
+    mv ./ninja /usr/bin  
+RUN rm -rf ninja
+
+RUN mkdir /workdir
+WORKDIR /workdir 
+
+# Install CMake 3.26.5
+RUN wget -O cmake-install.sh https://github.com/Kitware/CMake/releases/download/v3.26.5/cmake-3.26.5-Linux-x86_64.sh && \
+    bash ./cmake-install.sh --skip-license --exclude-subdir --prefix=/usr/local && \
+    rm -f ./cmake-install.sh
+
+RUN wget -O llvmorg-16.0.6.tar.gz https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-16.0.6.tar.gz && \
+    mkdir llvm && \
+    tar -xvf llvmorg-16.0.6.tar.gz -C llvm
+
+RUN cd llvm/llvm-project-llvmorg-16.0.6 && \
+    source scl_source enable devtoolset-11 && \
+    cmake -S llvm -B build -G Ninja -DLLVM_ENABLE_PROJECTS="clang;lld" -DCMAKE_BUILD_TYPE=Release
+
+RUN cd llvm/llvm-project-llvmorg-16.0.6 && \
+    source scl_source enable devtoolset-11 && \
+    ninja -C build clang
+
+RUN cd llvm/llvm-project-llvmorg-16.0.6 && \
+    source scl_source enable devtoolset-11 && \
+    ninja -C build lld
+
+RUN cd llvm/llvm-project-llvmorg-16.0.6 && \
+    source scl_source enable devtoolset-11 && \
+    ninja -C build install
+
+RUN rm -rf /workdir/*
+
+RUN rsync -ravh --exclude '/sys' /opt/rh/devtoolset-11/root/ /
+
+RUN yum remove devtoolset-11 -y \
+    && \
+    yum clean all
+
+FROM build as final
+FROM scratch
+COPY --from=build / /

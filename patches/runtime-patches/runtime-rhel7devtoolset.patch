@@ -1,0 +1,78 @@
+diff --git a/eng/testing/linker/project.csproj.template b/eng/testing/linker/project.csproj.template
+index ab498732..dcffc916 100644
+--- a/eng/testing/linker/project.csproj.template
++++ b/eng/testing/linker/project.csproj.template
+@@ -41,7 +41,7 @@
+   </PropertyGroup>
+ 
+   <ItemGroup>
+-    <CustomLinkerArg Condition="'$(CrossBuild)' == 'true' and '$(_hostArchitecture)' == '$(_targetArchitecture)' and '$(ROOTFS_DIR)' != ''" Include="--gcc-toolchain=$(ROOTFS_DIR)/usr" />
++    <CustomLinkerArg Condition="'$(CrossBuild)' == 'true' and '$(_hostArchitecture)' == '$(_targetArchitecture)' and '$(ROOTFS_DIR)' != ''" Include="--gcc-toolchain=$(ROOTFS_DIR)/opt/rh/devtoolset-12/root/usr" />
+   </ItemGroup>
+ 
+   <ItemGroup>
+diff --git a/eng/testing/tests.singlefile.targets b/eng/testing/tests.singlefile.targets
+index 4f4bcb48..89c2e82e 100644
+--- a/eng/testing/tests.singlefile.targets
++++ b/eng/testing/tests.singlefile.targets
+@@ -60,7 +60,7 @@
+   </Target>
+ 
+   <ItemGroup Condition="'$(NativeAotSupported)' == 'true'">
+-    <CustomLinkerArg Condition="'$(CrossBuild)' == 'true' and '$(_hostArchitecture)' == '$(_targetArchitecture)' and '$(_hostOS)' != 'windows'" Include="--gcc-toolchain=$(ROOTFS_DIR)/usr" />
++    <CustomLinkerArg Condition="'$(CrossBuild)' == 'true' and '$(_hostArchitecture)' == '$(_targetArchitecture)' and '$(_hostOS)' != 'windows'" Include="--gcc-toolchain=$(ROOTFS_DIR)/opt/rh/devtoolset-12/root/usr" />
+   </ItemGroup>
+ 
+   <PropertyGroup Condition="'$(PublishSingleFile)' == 'true' or '$(TestNativeAot)' == 'true'">
+diff --git a/src/coreclr/tools/aot/ILCompiler/ILCompiler.csproj b/src/coreclr/tools/aot/ILCompiler/ILCompiler.csproj
+index 7e5f9305..d216dcf0 100644
+--- a/src/coreclr/tools/aot/ILCompiler/ILCompiler.csproj
++++ b/src/coreclr/tools/aot/ILCompiler/ILCompiler.csproj
+@@ -68,7 +68,7 @@
+   </Target>
+ 
+   <ItemGroup Condition="'$(NativeAotSupported)' == 'true'">
+-    <CustomLinkerArg Condition="'$(CrossBuild)' == 'true' and '$(_hostArchitecture)' == '$(_targetArchitecture)' and '$(_hostOS)' != 'windows'" Include="--gcc-toolchain=$(ROOTFS_DIR)/usr" />
++    <CustomLinkerArg Condition="'$(CrossBuild)' == 'true' and '$(_hostArchitecture)' == '$(_targetArchitecture)' and '$(_hostOS)' != 'windows'" Include="--gcc-toolchain=$(ROOTFS_DIR)/opt/rh/devtoolset-12/root/usr" />
+   </ItemGroup>
+ 
+   <Target Name="PublishCompiler"
+diff --git a/src/coreclr/tools/aot/crossgen2/crossgen2.csproj b/src/coreclr/tools/aot/crossgen2/crossgen2.csproj
+index ceeb4d63..9892c0fd 100644
+--- a/src/coreclr/tools/aot/crossgen2/crossgen2.csproj
++++ b/src/coreclr/tools/aot/crossgen2/crossgen2.csproj
+@@ -40,7 +40,7 @@
+   </PropertyGroup>
+ 
+   <ItemGroup Condition="'$(NativeAotSupported)' == 'true'">
+-    <CustomLinkerArg Condition="'$(CrossBuild)' == 'true' and '$(_hostArchitecture)' == '$(_targetArchitecture)' and '$(_hostOS)' != 'windows'" Include="--gcc-toolchain=$(ROOTFS_DIR)/usr" />
++    <CustomLinkerArg Condition="'$(CrossBuild)' == 'true' and '$(_hostArchitecture)' == '$(_targetArchitecture)' and '$(_hostOS)' != 'windows'" Include="--gcc-toolchain=$(ROOTFS_DIR)/opt/rh/devtoolset-12/root/usr" />
+   </ItemGroup>
+ 
+   <Import Project="$(R2ROverridePath)" Condition="'$(R2ROverridePath)' != ''" />
+diff --git a/src/libraries/System.Runtime.InteropServices/tests/TestAssets/NativeExports/NativeExports.csproj b/src/libraries/System.Runtime.InteropServices/tests/TestAssets/NativeExports/NativeExports.csproj
+index b5763ece..9aeb4ada 100644
+--- a/src/libraries/System.Runtime.InteropServices/tests/TestAssets/NativeExports/NativeExports.csproj
++++ b/src/libraries/System.Runtime.InteropServices/tests/TestAssets/NativeExports/NativeExports.csproj
+@@ -88,7 +88,7 @@
+     </XmlPeek>
+ 
+     <PropertyGroup>
+-      <CommonToolchainArgs>--target=$(TargetTriple) --gcc-toolchain=$(ROOTFS_DIR)/usr --sysroot=$(ROOTFS_DIR)</CommonToolchainArgs>
++      <CommonToolchainArgs>--target=$(TargetTriple) --gcc-toolchain=$(ROOTFS_DIR)/opt/rh/devtoolset-12/root/usr --sysroot=$(ROOTFS_DIR)</CommonToolchainArgs>
+       <DnneLinkerUserFlags>$(CommonToolchainArgs) $(DnneLinkerCommand) $(DnneLinkerUserFlags.Replace(';',' '))</DnneLinkerUserFlags>
+       <DnneCompilerUserFlags>$(CommonToolchainArgs) $(DnneCompilerUserFlags.Replace(';',' '))</DnneCompilerUserFlags>
+     </PropertyGroup>
+diff --git a/src/tests/Directory.Build.targets b/src/tests/Directory.Build.targets
+index 6a6bdcba..9330de40 100644
+--- a/src/tests/Directory.Build.targets
++++ b/src/tests/Directory.Build.targets
+@@ -541,7 +541,7 @@
+   </PropertyGroup>
+ 
+   <ItemGroup Condition="'$(TestBuildMode)' == 'nativeaot'">
+-    <CustomLinkerArg Condition="'$(CrossBuild)' == 'true' and '$(_hostArchitecture)' == '$(_targetArchitecture)' and '$(_hostOS)' != 'windows'" Include="--gcc-toolchain=$(ROOTFS_DIR)/usr" />
++    <CustomLinkerArg Condition="'$(CrossBuild)' == 'true' and '$(_hostArchitecture)' == '$(_targetArchitecture)' and '$(_hostOS)' != 'windows'" Include="--gcc-toolchain=$(ROOTFS_DIR)/opt/rh/devtoolset-12/root/usr" />
+     <IlcReference Include="$(TargetingPackPath)/*.dll" />
+ 
+     <!-- xunit calls MakeGenericType to check if something is IEquatable -->

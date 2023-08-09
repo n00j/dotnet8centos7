@@ -1,0 +1,66 @@
+FROM centos:centos8
+
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+
+RUN yum repolist && yum update -y \
+    && \
+    yum install -y \
+        wget \
+        libicu-devel \
+        python3 \
+        llvm-toolset \
+        # lttng-ust-devel \ # will probably need this
+        gcc-toolset-11 \
+        git \
+        scl-utils \
+    && \
+    yum clean all
+
+RUN mkdir /workdir
+WORKDIR /workdir 
+
+# Install CMake 3.26.5
+RUN wget -O cmake-install.sh https://github.com/Kitware/CMake/releases/download/v3.26.5/cmake-3.26.5-Linux-x86_64.sh && \
+    bash ./cmake-install.sh --skip-license --exclude-subdir --prefix=/usr/local && \
+    rm -f ./cmake-install.sh
+
+RUN cd /opt && \
+    wget https://www.python.org/ftp/python/3.7.9/Python-3.7.9.tgz && \
+    tar xzf Python-3.7.9.tgz && \
+    cd Python-3.7.9 && \
+    ./configure --enable-optimizations && \
+    make altinstall
+
+RUN wget -O 3.1.tar.gz https://github.com/skvadrik/re2c/archive/refs/tags/3.1.tar.gz && \
+    mkdir re2c && \
+    tar -xvf 3.1.tar.gz -C re2c
+
+RUN cd re2c/re2c-3.1 && \
+    mkdir .build && \
+    cd .build && \
+    cmake .. && \
+    cmake --build . && \
+    make install
+
+RUN wget -O v1.11.1.tar.gz https://github.com/ninja-build/ninja/archive/refs/tags/v1.11.1.tar.gz && \
+    mkdir ninja && \
+    tar -xvf v1.11.1.tar.gz -C ninja
+
+RUN cd ninja/ninja-1.11.1 && \
+    source scl_source enable gcc-toolset-11 && \
+    python3 configure.py --bootstrap && \
+    ./ninja -v && \
+    mv ./ninja /usr/bin  
+RUN rm -rf ninja
+
+# Install nodejs required for building aspnetcore
+RUN dnf module -y enable nodejs:16 \
+    && \
+    dnf install -y nodejs
+
+COPY entrypoint_centos8.sh /usr/bin/entrypoint.sh
+RUN chmod +x /usr/bin/entrypoint.sh
+
+ENTRYPOINT [ "/usr/bin/entrypoint.sh" ]
+

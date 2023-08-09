@@ -1,0 +1,12 @@
+diff --git a/NuGet.config b/NuGet.config
+index 1348db7..db6f2a3 100644
+--- a/NuGet.config
++++ b/NuGet.config
+@@ -2,6 +2,7 @@
+ <configuration>
+   <packageSources>
+     <clear />
++    <add key="local" value="/src/artifacts/local-packages" />
+     <!--Begin: Package sources managed by Dependency Flow automation. Do not edit the sources below.-->
+     <!--  Begin: Package sources from dotnet-aspnetcore -->
+     <!--  End: Package sources from dotnet-aspnetcore -->

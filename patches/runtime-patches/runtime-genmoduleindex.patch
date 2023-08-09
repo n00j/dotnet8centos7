@@ -1,0 +1,13 @@
+diff --git a/eng/native/genmoduleindex.sh b/eng/native/genmoduleindex.sh
+index d2cb9bc6..c58bdffd 100755
+--- a/eng/native/genmoduleindex.sh
++++ b/eng/native/genmoduleindex.sh
+@@ -2,7 +2,7 @@
+ #
+ # Generate module index header
+ #
+-set -euo pipefail
++set -euo
+ 
+ if [[ "$#" -lt 2 ]]; then
+   echo "Usage: genmoduleindex.sh ModuleBinaryFile IndexHeaderFile readelfBinaryPath"
